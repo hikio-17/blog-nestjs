@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
+import { UpdateUserDTO } from 'src/models/user.model';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -13,8 +14,32 @@ export class UserService {
     return await this.userRepo.findOne({ where: { username } });
   }
 
-  async updateUser(username: string, data) {
+  async updateUser(username: string, data: UpdateUserDTO) {
     await this.userRepo.update({ username }, data);
     return this.findByUsername(username);
+  }
+
+  async followUser(currentUser: UserEntity, username: string) {
+    const user = await this.userRepo.findOne({
+      where: { username },
+      relations: ['followers'],
+    });
+
+    user.followers.push(currentUser);
+    await user.save();
+    return user.toProfile(currentUser);
+  }
+
+  async unfollowUser(currentUser: UserEntity, username: string) {
+    const user = await this.userRepo.findOne({
+      where: { username },
+      relations: ['followers'],
+    });
+
+    user.followers = user.followers.filter(
+      (follower) => follower !== currentUser,
+    );
+    await user.save();
+    return user.toProfile(currentUser);
   }
 }

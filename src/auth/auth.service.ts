@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from 'src/entities/user.entity';
-import { LoginDTO, RegisterDTO } from 'src/models/user.model';
+import { LoginDTO, RegisterDTO, UpdateUserDTO } from 'src/models/user.model';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -50,5 +50,20 @@ export class AuthService {
     } catch (err) {
       throw new UnauthorizedException(err.message);
     }
+  }
+
+  async updateUser(username: string, data: UpdateUserDTO) {
+    await this.userRepo.update({ username }, data);
+    const user = await this.userRepo.findOne({ where: { username } });
+    const payload = { username };
+    const token = this.jwtService.sign(payload);
+    return { user: { ...user.toJSON(), token } };
+  }
+
+  async findCurrentUser(username: string) {
+    const user = await this.userRepo.findOne({ where: { username } });
+    const payload = { username };
+    const token = this.jwtService.sign(payload);
+    return { user: { ...user.toJSON(), token } };
   }
 }

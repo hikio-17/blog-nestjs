@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "APIURL=http://localhost:4000/api ./e2e/ run-api-tests.sh"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -30,12 +30,14 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
+    "newman": "^6.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "slug": "^8.2.3",
     "typeorm": "^0.3.17"
   },
   "devDependencies": {
@@ -48,6 +50,7 @@
     "@types/node": "^20.3.1",
     "@types/passport": "^1.0.16",
     "@types/passport-jwt": "^3.0.13",
+    "@types/slug": "^5.0.7",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

@@ -47,7 +47,6 @@ export class UserEntity extends AbstractEntity {
   articles: ArticleEntity[];
 
   @ManyToMany((type) => ArticleEntity, (article) => article.favoritedBy)
-  @JoinColumn()
   favorites: ArticleEntity[];
 
   @BeforeInsert()

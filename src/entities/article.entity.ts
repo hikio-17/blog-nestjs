@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BeforeInsert,
   Column,
   Entity,
-  JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   RelationCount,
@@ -13,7 +14,7 @@ import * as slugify from 'slug';
 import { classToPlain } from 'class-transformer';
 import { UserEntity } from './user.entity';
 
-@Entity('aarticles')
+@Entity('articles')
 export class ArticleEntity extends AbstractEntity {
   @Column()
   slug: string;
@@ -22,21 +23,23 @@ export class ArticleEntity extends AbstractEntity {
   title: string;
 
   @Column()
+  description: string;
+
+  @Column()
   body: string;
 
-  @Column('simple-array')
-  tags: string[];
-
   @ManyToMany((type) => UserEntity, (user) => user.favorites, { eager: true })
-  @JoinColumn()
+  @JoinTable()
   favoritedBy: UserEntity[];
-
-  @ManyToOne((type) => UserEntity, (user) => user.articles, { eager: true })
-  @Column()
-  author: string;
 
   @RelationCount((article: ArticleEntity) => article.favoritedBy)
   favoritesCount: number;
+
+  @ManyToOne((type) => UserEntity, (user) => user.articles, { eager: true })
+  author: UserEntity;
+
+  @Column('simple-array')
+  tagList: string[];
 
   @BeforeInsert()
   generateSlug() {
@@ -50,11 +53,11 @@ export class ArticleEntity extends AbstractEntity {
     return classToPlain(this);
   }
 
-  toArticle(user: UserEntity) {
+  toArticle(user?: UserEntity) {
     let favorited = null;
 
     if (user) {
-      favorited = this.favoritedBy.includes(user);
+      favorited = this.favoritedBy.map((user) => user.id).includes(user.id);
     }
     const article: any = this.toJson();
     delete article.favoritedBy;

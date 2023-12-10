@@ -7,12 +7,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   RelationCount,
 } from 'typeorm';
 import { AbstractEntity } from './abstract-entity';
 import * as slugify from 'slug';
 import { classToPlain } from 'class-transformer';
 import { UserEntity } from './user.entity';
+import { CommentEntity } from './comment.entity';
 
 @Entity('articles')
 export class ArticleEntity extends AbstractEntity {
@@ -34,6 +36,9 @@ export class ArticleEntity extends AbstractEntity {
 
   @RelationCount((article: ArticleEntity) => article.favoritedBy)
   favoritesCount: number;
+
+  @OneToMany((type) => CommentEntity, (comment) => comment.article)
+  comments: CommentEntity[];
 
   @ManyToOne((type) => UserEntity, (user) => user.articles, { eager: true })
   author: UserEntity;

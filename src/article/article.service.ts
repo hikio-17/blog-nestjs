@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from 'src/entities/article.entity';
+import { TagEntity } from 'src/entities/tag.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import {
   CreateArticleDTO,
@@ -22,7 +23,23 @@ export class ArticleService {
     private articleRepo: Repository<ArticleEntity>,
     @InjectRepository(UserEntity)
     private userRepo: Repository<UserEntity>,
+    @InjectRepository(TagEntity)
+    private tagRepo: Repository<TagEntity>,
   ) {}
+
+  private async upsertTags(tagList: string[]) {
+    const foundTags = await this.tagRepo.find({
+      where: tagList.map((t) => ({ tag: t })),
+    });
+    const newTags = tagList.filter(
+      (t) => !foundTags.map((t) => t.tag).includes(t),
+    );
+    await Promise.all(
+      this.tagRepo
+        .create(newTags.map((t) => ({ tag: t })))
+        .map((t) => t.save()),
+    );
+  }
 
   async findAll(user: UserEntity, query: FindAllQuery) {
     const findOptions: any = {
@@ -81,6 +98,7 @@ export class ArticleService {
   async createArticle(user: UserEntity, data: CreateArticleDTO) {
     const article = this.articleRepo.create(data);
     article.author = user;
+    await this.upsertTags(data.tagList);
     const { slug } = await article.save();
     return (await this.articleRepo.findOne({ where: { slug } })).toArticle(
       user,

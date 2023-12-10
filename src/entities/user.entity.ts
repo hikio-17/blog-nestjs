@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { ArticleEntity } from './article.entity';
+import { CommentEntity } from './comment.entity';
 
 @Entity('users')
 export class UserEntity extends AbstractEntity {
@@ -30,7 +31,7 @@ export class UserEntity extends AbstractEntity {
   bio: string;
 
   @Column({ default: null, nullable: true })
-  image: string;
+  image: string | null;
 
   @Column()
   @Exclude()
@@ -45,6 +46,9 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany((type) => ArticleEntity, (article) => article.author)
   articles: ArticleEntity[];
+
+  @OneToMany((type) => CommentEntity, (comment) => comment.author)
+  comments: CommentEntity[];
 
   @ManyToMany((type) => ArticleEntity, (article) => article.favoritedBy)
   favorites: ArticleEntity[];
